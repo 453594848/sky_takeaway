@@ -1,6 +1,6 @@
 sky:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driverhttps://github.com/453594848/sky_takeaway/blob/main/sky-server/src/main/resources/application-dev.yml
     host: localhost
     port: 3306
     database: sky_take_out
