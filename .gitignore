@@ -3,5 +3,5 @@
 *.iml
 *.class
 *Test.java
-**.yml
+/mtk/application-dev.yml
 **/test/
