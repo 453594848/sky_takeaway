@@ -1,6 +1,6 @@
 sky:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driverhttps://github.com/453594848/sky_takeaway/blob/main/sky-server/src/main/resources/application-dev.yml
+    driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
     port: 3306
     database: sky_take_out
@@ -8,3 +8,7 @@ sky:
     password: 1
 
   alioss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    access-key-id: LTAI5tLe3uZr2jQxRM36ffky
+    access-key-secret: I413q6NOnipJXD3FxBuR7VOe5XqTIg
+    bucket-name: text-wang
