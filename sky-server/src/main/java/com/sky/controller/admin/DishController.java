@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@Api("菜品管理")
+@Api(tags = "菜品管理")
 @Slf4j
 @RequestMapping("/admin/dish")
 public class DishController {
@@ -66,7 +66,7 @@ public class DishController {
         return Result.success();
     }
 
-    @ApiOperation("菜品起售、停售")
+   @ApiOperation("菜品起售、停售")
     @PostMapping("/status/{status}")
     public Result startOrStop(@PathVariable Integer status, Long id) {
         log.info("菜品起售、停售Id:{}",id);
