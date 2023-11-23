@@ -20,7 +20,7 @@
                 dish.name = #{name},
             </if>
             <if test="categoryId !=null and categoryId !=''">
-                 dish.category_id =#{categoryId},
+                dish.category_id =#{categoryId},
             </if>
             <if test="price  !=null and price !=''">
                 dish.price=#{price},
@@ -31,7 +31,7 @@
             <if test="description  !=null and description !=''">
                 dish.status=#{status},
             </if>
-            <if test="status  !=null and status !=''">
+            <if test="status  !=null">
                 dish.status=#{status},
             </if>
         </set>

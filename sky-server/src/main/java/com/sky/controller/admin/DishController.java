@@ -19,8 +19,11 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/admin/dish")
 public class DishController {
-    @Autowired
-    private DishService dishService;
+    private final DishService dishService;
+
+    public DishController(DishService dishService) {
+        this.dishService = dishService;
+    }
 
     @ApiOperation("添加菜品")
     @PostMapping
@@ -45,18 +48,30 @@ public class DishController {
         dishService.deleteBatch(ids);
         return Result.success();
     }
+
     @ApiOperation("根据ID查询菜品")
     @GetMapping("/{id}")
-    public Result<DishVO> getByID(@PathVariable Long id){
+    public Result<DishVO> getByID(@PathVariable Long id) {
         log.info("根据ID查询菜品：{}", id);
-        DishVO dishVO =dishService.getById(id);
+        DishVO dishVO = dishService.getById(id);
         return Result.success(dishVO);
     }
-@ApiOperation("修改菜品")
-@PutMapping
-   public Result update(@RequestBody DishDTO dishDTO){
-    log.info("修改菜品：{}", dishDTO);
-    dishService.updateAndFlavor(dishDTO);
-    return Result.success();
-   }
+
+    @ApiOperation("修改菜品")
+    @PutMapping
+    public Result update(@RequestBody DishDTO dishDTO) {
+        log.info("修改菜品：{}", dishDTO);
+        dishService.updateAndFlavor(dishDTO);
+        return Result.success();
+    }
+
+    @ApiOperation("菜品起售、停售")
+    @PostMapping("/status/{status}")
+    public Result startOrStop(@PathVariable Integer status, Long id) {
+        log.info("菜品起售、停售Id:{}",id);
+        dishService.startOrStop(status,id);
+
+        return Result.success();
+    }
+
 }

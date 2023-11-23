@@ -1,7 +1,7 @@
 package com.sky.annotation;
 /*
-* 自定义注解，标识字段自动填充
-* */
+ * 自定义注解，标识字段自动填充
+ * */
 
 import com.sky.enumeration.OperationType;
 

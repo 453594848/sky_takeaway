@@ -27,8 +27,14 @@ public interface DishService {
      * 根据ID查询员工
      * */
     DishVO getById(Long id);
-/*
-* 修改菜品
-* */
+
+    /*
+     * 修改菜品
+     * */
     void updateAndFlavor(DishDTO dishDTO);
+
+    /*
+     * 菜品起售、停售
+     * */
+    void startOrStop(Integer status, Long id);
 }

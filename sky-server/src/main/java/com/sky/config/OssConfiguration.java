@@ -17,7 +17,7 @@ public class OssConfiguration {
     //容器中不存在指定类型的 Bean 时，才会生效
     @ConditionalOnMissingBean
     public AliOssUtil aliOssUtil(AliOssProperties aliOssProperties) {
-        log.info("创建阿里云上传对象：{}",aliOssProperties);
+        log.info("创建阿里云上传对象：{}", aliOssProperties);
         return new AliOssUtil(aliOssProperties.getEndpoint(), aliOssProperties.getAccessKeyId(),
                 aliOssProperties.getAccessKeySecret(), aliOssProperties.getBucketName());
     }
