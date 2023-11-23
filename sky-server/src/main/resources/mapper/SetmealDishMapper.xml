@@ -2,6 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.SetmealDishMapper">
+    <insert id="insertBatch">
+        insert into sky_take_out.setmeal_dish (setmeal_id, dish_id, name, price, copies)
+        VALUES
+        <foreach collection="setmealDishes" item="sd" separator=",">
+            (#{sd.setmealId},#{sd.dishId},#{sd.name},#{sd.price},#{sd.copies})
+        </foreach>
+    </insert>
 
     <select id="getSetmealIdByDishID" resultType="java.lang.Long">
         select setmeal_id
@@ -10,5 +17,21 @@
         <foreach collection="ids" item="id" separator="," open="(" close=")">
             #{id}
         </foreach>
+    </select>
+    <select id="pageQuery" resultType="com.sky.vo.SetmealVO" >
+        select s.*,c.name categoryName from sky_take_out.setmeal as s join sky_take_out.category as c
+                 on s.category_id = c.id
+        <where>
+            <if test="name != null and name!=''">
+                name like concat('%',#{name},'%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+        </where>
+        order by create_time desc
     </select>
 </mapper>

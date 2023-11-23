@@ -31,16 +31,16 @@
             <if test="status != null">
                 status = #{status},
             </if>
-
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser}
+            </if>
         </set>
         where id = #{id}
     </update>
-    <!--   <if test="updateTime != null">
-                   update_time = #{updateTime},
-               </if>
-               <if test="updateUser != null">
-                   update_user = #{updateUser}
-               </if>-->
+
     <select id="list" resultType="Category">
         select * from sky_take_out.category
         where status = 1

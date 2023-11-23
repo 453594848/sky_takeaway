@@ -31,9 +31,11 @@
             <if test="description  !=null and description !=''">
                 dish.status=#{status},
             </if>
-            <if test="status  !=null">
+            <if test="status  !=null ">
                 dish.status=#{status},
             </if>
+            <if test="updateTime != null">update_Time = #{updateTime},</if>
+            <if test="updateUser != null">update_User = #{updateUser}</if>
         </set>
         where id=#{id}
     </update>
@@ -43,13 +45,28 @@
             <if test="name !=null and name !=''">
                 and dish.name like concat('%',#{name},'%')
             </if>
-            <if test="categoryId !=null and categoryId !=''">
+            <if test="categoryId !=null ">
                 and dish.category_id =#{categoryId}
             </if>
-            <if test="status  !=null and status !=''">
+            <if test="status  !=null ">
                 and dish.status=#{status}
             </if>
         </where>
         order by dish.create_time desc
+    </select>
+    <select id="list" resultType="com.sky.entity.Dish" parameterType="Dish">
+        select * from sky_take_out.dish
+        <where>
+            <if test="name != null">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
     </select>
 </mapper>
