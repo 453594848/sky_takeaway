@@ -32,16 +32,19 @@ public class CommonController {
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) {
         try {
+            //原始文件名
             String originalFilename = file.getOriginalFilename();
             String objectName;
             if (originalFilename != null) {
+                //截取原始文件名后缀
                 String substring = originalFilename.substring(originalFilename.lastIndexOf("."));
+                //拼接后缀
                 objectName = UUID.randomUUID().toString() + substring;
             } else {
                 objectName = UUID.randomUUID().toString() + "jpg";
             }
-            aliOssUtil.upload(file.getBytes(), objectName);
-            return Result.success(objectName);
+            String upload = aliOssUtil.upload(file.getBytes(), objectName);
+            return Result.success(upload);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
