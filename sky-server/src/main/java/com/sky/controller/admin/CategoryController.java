@@ -23,8 +23,11 @@ import java.util.List;
 @Slf4j
 public class CategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     /**
      * 新增分类
