@@ -419,7 +419,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //支付状态
-        Integer payStatus = ordersDB.getPayStatus();
+       /* Integer payStatus = ordersDB.getPayStatus();
         if (payStatus == Orders.PAID) {
             //用户已支付，需要退款
             String refund = weChatPayUtil.refund(
@@ -428,7 +428,7 @@ public class OrderServiceImpl implements OrderService {
                     new BigDecimal(0.01),
                     new BigDecimal(0.01));
             log.info("申请退款：{}", refund);
-        }
+        }*/
 
         // 拒单需要退款，根据订单id更新订单状态、拒单原因、取消时间
         Orders orders = new Orders();
@@ -449,7 +449,7 @@ public class OrderServiceImpl implements OrderService {
         Orders ordersDB = orderMapper.getById(ordersCancelDTO.getId());
 
         //支付状态
-        Integer payStatus = ordersDB.getPayStatus();
+       /* Integer payStatus = ordersDB.getPayStatus();
         if (payStatus == 1) {
             //用户已支付，需要退款
             String refund = weChatPayUtil.refund(
@@ -458,7 +458,7 @@ public class OrderServiceImpl implements OrderService {
                     new BigDecimal(0.01),
                     new BigDecimal(0.01));
             log.info("申请退款：{}", refund);
-        }
+        }*/
 
         // 管理端取消订单需要退款，根据订单id更新订单状态、取消原因、取消时间
         Orders orders = new Orders();
