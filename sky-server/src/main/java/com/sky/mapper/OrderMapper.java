@@ -7,6 +7,9 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Mapper
 public interface OrderMapper {
     /*
@@ -61,4 +64,10 @@ public interface OrderMapper {
      */
     @Select("select count(id) from sky_take_out.orders where status = #{status}")
     Integer countStatus(Integer status);
+
+    /*
+    * 查询超时未付款账单
+    * */
+    @Select("select * from sky_take_out.orders where status= #{pendingPayment} and order_time< #{localDateTime}" )
+    List<Orders> getBYStatusAndOrderTimeLT(Integer pendingPayment, LocalDateTime localDateTime);
 }
