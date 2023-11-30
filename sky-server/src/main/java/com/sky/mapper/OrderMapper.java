@@ -70,4 +70,12 @@ public interface OrderMapper {
     * */
     @Select("select * from sky_take_out.orders where status= #{pendingPayment} and order_time< #{localDateTime}" )
     List<Orders> getBYStatusAndOrderTimeLT(Integer pendingPayment, LocalDateTime localDateTime);
+
+
+
+    /*
+    * 查询已完成订单营业额
+    * */
+@Select("select sum(amount) from sky_take_out.orders where status =5 and order_time between #{begin} and #{end}")
+    Double getByStatusAndDateTime(LocalDateTime begin, LocalDateTime end, int i);
 }
