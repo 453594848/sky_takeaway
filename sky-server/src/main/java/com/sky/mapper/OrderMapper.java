@@ -92,6 +92,13 @@ public interface OrderMapper {
      * */
     @Select("select COUNT(user_id) from sky_take_out.orders where status =5 and order_time between #{begin} and #{end}")
     Integer UserSumGetByDateTime(LocalDate begin, LocalDate end, int i);
+
+    /**
+     * 根据动态条件统计营业额数据
+     * @param map
+     * @return
+     */
+    Double sumByMap(Map map);
     /**
      * 根据动态条件统计订单数量
      * @param map
