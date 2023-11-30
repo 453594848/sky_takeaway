@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -16,6 +17,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.sky.entity.Orders.PENDING_PAYMENT;
@@ -42,11 +45,10 @@ public class OrderServiceImpl implements OrderService {
     private final ShopCartMapper shopCartMapper;
     private final UserMapper userMapper;
     private final WeChatPayUtil weChatPayUtil;
+    private WebSocketServer webSocketServer;
 
-    @Autowired
 
-
-    public OrderServiceImpl(OrderMapper orderMapper, OrderDetailMapper orderDetailMapper, AddressBookMapper addressBookMapper, ShopCartMapper shopCartMapper, UserMapper userMapper, WeChatPayUtil weChatPayUtil) {
+    public OrderServiceImpl(OrderMapper orderMapper, OrderDetailMapper orderDetailMapper, AddressBookMapper addressBookMapper, ShopCartMapper shopCartMapper, UserMapper userMapper, WeChatPayUtil weChatPayUtil, WebSocketServer webSocketServer) {
         this.orderMapper = orderMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.addressBookMapper = addressBookMapper;
@@ -54,6 +56,7 @@ public class OrderServiceImpl implements OrderService {
         this.userMapper = userMapper;
         this.weChatPayUtil = weChatPayUtil;
 
+        this.webSocketServer = webSocketServer;
     }
 
     /*
@@ -154,6 +157,15 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        //通过webSocket向客户端发送来电提醒
+        Map map = new HashMap<>();
+        map.put("type", 1);//1表示来单提醒，2客户催单
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号：" + outTradeNo);
+
+        String jsonString = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(jsonString);
     }
 
     /*
@@ -468,6 +480,7 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelTime(LocalDateTime.now());
         orderMapper.update(orders);
     }
+
     /**
      * 派送订单
      *
@@ -489,6 +502,7 @@ public class OrderServiceImpl implements OrderService {
 
         orderMapper.update(orders);
     }
+
     /**
      * 完成订单
      *
@@ -510,5 +524,18 @@ public class OrderServiceImpl implements OrderService {
         orders.setDeliveryTime(LocalDateTime.now());
 
         orderMapper.update(orders);
+    }
+
+    /*
+     * 客户催单
+     * */
+    @Override
+    public void reminder(Long id) {
+        Orders ordersDB = orderMapper.getById(id);
+        Map map=new HashMap<>();
+        map.put("type",2);
+        map.put("orderId",id);
+        map.put("content","订单号："+ordersDB.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 }
