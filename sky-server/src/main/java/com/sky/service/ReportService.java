@@ -6,6 +6,7 @@ import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import org.apache.ibatis.annotations.Param;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 
 public interface ReportService {
@@ -41,4 +42,8 @@ public interface ReportService {
      * @return
      */
     SalesTop10ReportVO getSalesTop10(LocalDate begin, LocalDate end);
+/*
+* 导出数据报表
+* */
+    void exportExcel(HttpServletResponse httpServletResponse);
 }

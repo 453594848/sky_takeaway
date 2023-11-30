@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 
 @RestController
@@ -29,7 +30,8 @@ public class ReportController {
     public ReportController(ReportService reportService) {
         this.reportService = reportService;
     }
-@ApiOperation(value = "营业额统计")
+
+    @ApiOperation(value = "营业额统计")
     @GetMapping("/turnoverStatistics")
     public Result<TurnoverReportVO> turnoverStatistics(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
@@ -38,6 +40,7 @@ public class ReportController {
         TurnoverReportVO turnoverReportVO = reportService.getTurnoverStatistics(begin, end);
         return Result.success(turnoverReportVO);
     }
+
     @ApiOperation(value = "顾客统计")
     @GetMapping("/userStatistics")
     public Result<UserReportVO> userStatistics(
@@ -47,6 +50,7 @@ public class ReportController {
         UserReportVO userReportVO = reportService.getUserStatistics(begin, end);
         return Result.success(userReportVO);
     }
+
     @ApiOperation(value = "订单统计")
     @GetMapping("/ordersStatistics")
     public Result<OrderReportVO> orderStatistics(
@@ -60,9 +64,15 @@ public class ReportController {
     @GetMapping("/top10")
     @ApiOperation("销量排名top10")
     public Result<SalesTop10ReportVO> top10(
-            @DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate begin,
-            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
-        log.info("销量排名top10：{},{}",begin,end);
-        return Result.success(reportService.getSalesTop10(begin,end));
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+        log.info("销量排名top10：{},{}", begin, end);
+        return Result.success(reportService.getSalesTop10(begin, end));
+    }
+
+    @ApiOperation(value = "导出数据报表")
+    @GetMapping("/export")
+    public void export(HttpServletResponse httpServletResponse) {
+        reportService.exportExcel(httpServletResponse);
     }
 }

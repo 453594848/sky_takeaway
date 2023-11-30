@@ -4,14 +4,19 @@ import com.sky.constant.MessageConstant;
 import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
-import com.sky.vo.OrderReportVO;
-import com.sky.vo.SalesTop10ReportVO;
-import com.sky.vo.TurnoverReportVO;
-import com.sky.vo.UserReportVO;
+import com.sky.service.WorkspaceService;
+import com.sky.vo.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.util.StringUtil;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,9 +30,11 @@ import java.util.stream.Collectors;
 
 public class ReportServiceImpl implements com.sky.service.ReportService {
     private final OrderMapper orderMapper;
+    private final WorkspaceService workspaceService;
 
-    public ReportServiceImpl(OrderMapper orderMapper) {
+    public ReportServiceImpl(OrderMapper orderMapper, WorkspaceService workspaceService) {
         this.orderMapper = orderMapper;
+        this.workspaceService = workspaceService;
     }
 
     /**
@@ -90,8 +97,8 @@ public class ReportServiceImpl implements com.sky.service.ReportService {
                 totalUserList.add(sum);
             }
             newUserList.add(0);
-            for (Integer i = 0;i<dateList.size()-1;i++){
-                Integer d_value = totalUserList.get(i+1) - totalUserList.get(i);
+            for (Integer i = 0; i < dateList.size() - 1; i++) {
+                Integer d_value = totalUserList.get(i + 1) - totalUserList.get(i);
                 newUserList.add(d_value);
             }
         }
@@ -104,6 +111,7 @@ public class ReportServiceImpl implements com.sky.service.ReportService {
 
     /**
      * 统计指定时间区间内的订单数据
+     *
      * @param begin
      * @param end
      * @return
@@ -145,15 +153,15 @@ public class ReportServiceImpl implements com.sky.service.ReportService {
         Integer validOrderCount = validOrderCountList.stream().reduce(Integer::sum).get();
 
         Double orderCompletionRate = 0.0;
-        if(totalOrderCount != 0){
+        if (totalOrderCount != 0) {
             //计算订单完成率
             orderCompletionRate = validOrderCount.doubleValue() / totalOrderCount;
         }
 
-        return  OrderReportVO.builder()
-                .dateList(StringUtils.join(dateList,","))
-                .orderCountList(StringUtils.join(orderCountList,","))
-                .validOrderCountList(StringUtils.join(validOrderCountList,","))
+        return OrderReportVO.builder()
+                .dateList(StringUtils.join(dateList, ","))
+                .orderCountList(StringUtils.join(orderCountList, ","))
+                .validOrderCountList(StringUtils.join(validOrderCountList, ","))
                 .totalOrderCount(totalOrderCount)
                 .validOrderCount(validOrderCount)
                 .orderCompletionRate(orderCompletionRate)
@@ -162,22 +170,24 @@ public class ReportServiceImpl implements com.sky.service.ReportService {
 
     /**
      * 根据条件统计订单数量
+     *
      * @param begin
      * @param end
      * @param status
      * @return
      */
-    private Integer getOrderCount(LocalDateTime begin, LocalDateTime end, Integer status){
+    private Integer getOrderCount(LocalDateTime begin, LocalDateTime end, Integer status) {
         Map map = new HashMap();
-        map.put("begin",begin);
-        map.put("end",end);
-        map.put("status",status);
+        map.put("begin", begin);
+        map.put("end", end);
+        map.put("status", status);
 
         return orderMapper.countByMap(map);
     }
 
     /**
      * 统计指定时间区间内的销量排名前10
+     *
      * @param begin
      * @param end
      * @return
@@ -201,4 +211,70 @@ public class ReportServiceImpl implements com.sky.service.ReportService {
                 .build();
     }
 
+    /*
+     * 导出数据报表
+     * */
+    @Override
+    public void exportExcel(HttpServletResponse response) {
+//1. 查询数据库，获取营业数据---查询最近30天的运营数据
+        LocalDate dateBegin = LocalDate.now().minusDays(30);
+        LocalDate dateEnd = LocalDate.now().minusDays(1);
+
+        //查询概览数据
+        BusinessDataVO businessDataVO = workspaceService.getBusinessData(LocalDateTime.of(dateBegin, LocalTime.MIN), LocalDateTime.of(dateEnd, LocalTime.MAX));
+
+        //2. 通过POI将数据写入到Excel文件中
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
+
+        try {
+            //基于模板文件创建一个新的Excel文件
+            XSSFWorkbook excel = new XSSFWorkbook(in);
+
+            //获取表格文件的Sheet页
+            XSSFSheet sheet = excel.getSheet("Sheet1");
+
+            //填充数据--时间
+            sheet.getRow(1).getCell(1).setCellValue("时间：" + dateBegin + "至" + dateEnd);
+
+            //获得第4行
+            XSSFRow row = sheet.getRow(3);
+            row.getCell(2).setCellValue(businessDataVO.getTurnover());
+            row.getCell(4).setCellValue(businessDataVO.getOrderCompletionRate());
+            row.getCell(6).setCellValue(businessDataVO.getNewUsers());
+
+            //获得第5行
+            row = sheet.getRow(4);
+            row.getCell(2).setCellValue(businessDataVO.getValidOrderCount());
+            row.getCell(4).setCellValue(businessDataVO.getUnitPrice());
+
+            //填充明细数据
+            for (int i = 0; i < 30; i++) {
+                LocalDate date = dateBegin.plusDays(i);
+                //查询某一天的营业数据
+                BusinessDataVO businessData = workspaceService.getBusinessData(LocalDateTime.of(date, LocalTime.MIN), LocalDateTime.of(date, LocalTime.MAX));
+
+                //获得某一行
+                row = sheet.getRow(7 + i);
+                row.getCell(1).setCellValue(date.toString());
+                row.getCell(2).setCellValue(businessData.getTurnover());
+                row.getCell(3).setCellValue(businessData.getValidOrderCount());
+                row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
+                row.getCell(5).setCellValue(businessData.getUnitPrice());
+                row.getCell(6).setCellValue(businessData.getNewUsers());
+            }
+
+            //3. 通过输出流将Excel文件下载到客户端浏览器
+            ServletOutputStream out = response.getOutputStream();
+            excel.write(out);
+
+            //关闭资源
+            out.close();
+            excel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
+
